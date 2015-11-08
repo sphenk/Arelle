@@ -419,7 +419,8 @@ def parseAndRun(args):
         # parse and run the FILENAME
         cntlr.startLogging(logFileName=(options.logFile or "logToPrint"),
                            logFormat=(options.logFormat or "[%(messageCode)s] %(message)s - %(file)s"),
-                           logLevel=(options.logLevel or "DEBUG"))
+                           logLevel=(options.logLevel or "DEBUG"),
+                           logToBuffer=getattr(options, "logToBuffer", False)) # e.g., used by EdgarRenderer to require buffered logging
         cntlr.run(options)
         
         return cntlr
@@ -790,7 +791,7 @@ class CntlrCmdLine(Cntlr.Cntlr):
         if filesource and not filesource.selection:
             if filesource.isArchive:
                 _entrypointFiles = []
-                for _archiveFile in filesource.dir:
+                for _archiveFile in (filesource.dir or ()): # .dir might be none if IOerror
                     filesource.select(_archiveFile)
                     if ModelDocument.Type.identify(filesource, filesource.url) in (ModelDocument.Type.INSTANCE, ModelDocument.Type.INLINEXBRL):
                         _entrypointFiles.append({"file":filesource.url})
